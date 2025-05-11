@@ -1,0 +1,30 @@
+# Environment files
+.env
+
+# Data directories
+npm-data/
+letsencrypt/
+orthanc-storage/
+postgres-data/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup files
+*.bak
+*.backup
+*~
+
+.qodo/
+venv/
+.venv/

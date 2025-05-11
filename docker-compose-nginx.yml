@@ -1,0 +1,80 @@
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: dicomweb-nginx
+    restart: unless-stopped
+    ports:
+      - '${HTTP_PORT:-9080}:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - dicomweb-network
+
+  postgres:
+    image: postgres:latest
+    container_name: dicomweb-postgres
+    environment:
+      POSTGRES_DB: orthanc
+      POSTGRES_USER: orthanc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orthanc}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orthanc"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dicomweb-network
+
+  orthanc:
+    image: 'orthancteam/orthanc:latest'
+    container_name: dicomweb-orthanc
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${DICOM_PORT:-4242}:4242'
+    environment:
+      - ORTHANC__POSTGRESQL__ENABLE_INDEX=true
+      - ORTHANC__POSTGRESQL__ENABLE_STORAGE=true
+      - ORTHANC__POSTGRESQL__HOST=postgres
+      - ORTHANC__POSTGRESQL__PORT=5432
+      - ORTHANC__POSTGRESQL__DATABASE=orthanc
+      - ORTHANC__POSTGRESQL__USERNAME=orthanc
+      - ORTHANC__POSTGRESQL__PASSWORD=${POSTGRES_PASSWORD:-orthanc}
+      - 'ORTHANC__REGISTERED_USERS={"orthanc": "orthanc"}'
+      - ORTHANC__DICOM_WEB__ENABLE=true
+      - ORTHANC__DICOM_WEB__ROOT=/dicom-web/
+      - ORTHANC__DICOM_WEB__ENABLE_WADO=true
+      - ORTHANC__DICOM_WEB__WADO_ROOT=/wado
+      - ORTHANC__AUTHENTICATION_ENABLED=false
+      - ORTHANC__REMOTE_ACCESS_ALLOWED=true
+    volumes:
+      - orthanc-storage:/var/lib/orthanc/db
+    restart: unless-stopped
+    networks:
+      - dicomweb-network
+
+  pyupsrs:
+    build:
+      context: ./pyupsrs
+      dockerfile: Dockerfile
+    container_name: dicomweb-pyupsrs
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - dicomweb-network
+
+networks:
+  dicomweb-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  orthanc-storage:
+  npm-data:
+  letsencrypt:
