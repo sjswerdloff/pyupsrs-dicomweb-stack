@@ -7,6 +7,9 @@ letsencrypt/
 orthanc-storage/
 postgres-data/
 
+# SSL certificates
+nginx/ssl/
+
 # Logs
 *.log
 
