@@ -95,16 +95,36 @@ findscu -P -aec ORTHANC -k QueryRetrieveLevel=STUDY localhost 4242
 ```javascript
 // HTTP WebSocket
 const ws = new WebSocket('ws://localhost:9080/dicom-web/ws/subscribers/{subscriber_id}');
+// HTTP WebSocket handlers
+ws.onopen = () => {
+    console.log('Connected to UPS notifications (HTTP)');
+};
+ws.onmessage = (event) => {
+    console.log('UPS message (HTTP):', event.data);
+};
+ws.onerror = (error) => {
+    console.error('WebSocket error (HTTP):', error);
+};
+ws.onclose = () => {
+    console.log('WebSocket closed (HTTP)');
+};
+
+
 
 // HTTPS WebSocket (WSS)
 const wss = new WebSocket('wss://localhost:9443/dicom-web/ws/subscribers/{subscriber_id}');
-
-ws.onopen = () => {
-    console.log('Connected to UPS notifications');
+// HTTPS WebSocket handlers
+wss.onopen = () => {
+    console.log('Connected to UPS notifications (WSS)');
 };
-
-ws.onmessage = (event) => {
-    console.log('UPS notification:', event.data);
+wss.onmessage = (event) => {
+    console.log('UPS message (WSS):', event.data);
+};
+wss.onerror = (error) => {
+    console.error('WebSocket error (WSS):', error);
+};
+wss.onclose = () => {
+    console.log('WebSocket closed (WSS)');
 };
 ```
 
@@ -218,7 +238,7 @@ To use pyupsrs from a GitHub repository instead of PyPI:
 
 For local development with a cloned pyupsrs repository:
 
-1. Clone pyupsrs locally (change from sjswerdloff to your fork) :
+1. Clone pyupsrs locally (change from sjswerdloff to your fork, and branch if appropriate):
    ```bash
    git clone https://github.com/sjswerdloff/pyupsrs.git /path/to/pyupsrs
    ```

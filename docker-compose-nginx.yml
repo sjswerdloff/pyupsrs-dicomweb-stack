@@ -7,6 +7,9 @@ services:
     ports:
       - '${HTTP_PORT:-9080}:80'
       - '${HTTPS_PORT:-9443}:443'
+    environment:
+      - HTTP_PORT=${HTTP_PORT:-9080}
+      - HTTPS_PORT=${HTTPS_PORT:-9443}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro

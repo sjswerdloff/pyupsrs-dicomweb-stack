@@ -34,14 +34,15 @@ if [ -f "./nginx/ssl/cert.pem" ] && [ -f "./nginx/ssl/key.pem" ]; then
 else
     echo "No SSL certificates found. Generating self-signed certificate for development..."
     mkdir -p ./nginx/ssl
-    
+
     # Generate self-signed certificate
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout ./nginx/ssl/key.pem \
         -out ./nginx/ssl/cert.pem \
         -subj "/C=US/ST=Development/L=Local/O=DICOMweb-Stack/CN=localhost" \
+        -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" \
         2>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         echo "✓ Self-signed certificate generated successfully"
         echo "  ⚠️  Note: Browsers will show security warnings - this is normal for development"
